@@ -44,10 +44,6 @@ dist/
 *.egg-info/
 *.egg
 
-# --- Dados grandes ou sensíveis ---
-texts/*.txt
-!texts/.gitkeep  # mantém a pasta vazia no repositório
-
 # --- Jupyter / Colab ---
 *.ipynb_checkpoints
 
