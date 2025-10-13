@@ -1,7 +1,8 @@
 from core.text_manager import TextManager
+from simulation.simulator import CacheSimulator
 
-# (posteriormente você importará o cache, ex: from algorithms.fifo_cache import FIFOCache)
-# cache = FIFOCache()
+import sys, os
+sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 
 def main():
     print("===== Leitor de Textos - Projeto RA2 =====")
@@ -16,15 +17,15 @@ def main():
                 print("Encerrando o programa...")
                 break
             elif text_id == -1:
-                print("Entrando no modo simulação...")
-                # Aqui vai chamar o módulo do Aluno D no futuro
+                print("Entrando no modo simulação...\n")
+                sim = CacheSimulator()
+                sim.run_all()
+                print("\nSimulação concluída! Retornando ao menu principal...\n")
                 continue
             elif 1 <= text_id <= 100:
-                # Por enquanto lê direto do disco
-                # (depois vai ser: text = cache.get_text(text_id))
                 text = TextManager.load_text(text_id)
                 print(f"\n--- Texto {text_id} ---\n")
-                print(text[:500] + "...\n")  # Mostra parte do texto
+                print(text[:500] + "...\n")
                 print("--------------------------\n")
             else:
                 print("Número inválido. Digite entre 1 e 100, ou 0/-1.")
