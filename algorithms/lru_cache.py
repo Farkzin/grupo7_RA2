@@ -14,6 +14,10 @@ class LRUCache(CacheBase):
             self.order.append(text_id)
 
     def _insert(self, text_id: int, content: str) -> None:
+        # se já existe na ordem (por exemplo re-inserção) - remover para evitar duplicates
+        if text_id in self.order:
+            self.order.remove(text_id)
+
         # se estiver cheio, remove o menos recentemente usado (primeiro da lista)
         if len(self.storage) >= self.capacity:
             lru_id = self.order.pop(0)
@@ -21,6 +25,5 @@ class LRUCache(CacheBase):
 
         # adiciona o novo item no final da lista
         self.storage[text_id] = content
-        if text_id in self.order:
-            self.order.remove(text_id)
         self.order.append(text_id)
+
