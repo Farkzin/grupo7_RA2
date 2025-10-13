@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from time import perf_counter
+from time import perf_counter, sleep, time
 from core.cache_interface import CacheInterface
 from core.text_manager import TextManager
 
@@ -33,13 +33,17 @@ class CacheBase(CacheInterface):
                 self.stats.hits += 1             # incrementa acertos
                 self._on_hit(text_id)            # política reage ao acesso
                 content = self.storage[text_id]  # lê conteúdo direto do cache
+                is_hit = True                    # simula latência de cache (1ms)
             
             # MISS: não está em memória
             else:
-                self.stats.misses += 1         # incrementa misses
-                content = self.load(text_id)   # carrega conteúdo do disco
-                self._insert(text_id, content) # política decide quem tirar e insere novo texto
+                self.stats.misses += 1           # incrementa misses
+                content = self.load(text_id)     # carrega conteúdo do disco
+                self._insert(text_id, content)   # política decide quem tirar e insere novo texto
+                is_hit = False                   # simula latência de cache (8ms)
             
+            sleep(0.001 if is_hit else 0.008)
+
             return content  # retorna o conteúdo obtido
 
         finally:

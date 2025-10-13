@@ -5,14 +5,18 @@ from algorithms.lfu_cache import LFUCache
 from simulation.simulator import CacheSimulator
 
 def choose_cache():
-    print("Escolha algoritmo de cache: (1) LRU (2) FIFO (3) LFU. Enter para LRU")
-    choice = input("> ").strip()
-    if choice == "2":
-        return FIFOCache()
-    elif choice == "3":
-        return LFUCache()
-    else:
-        return LRUCache()
+    print("Escolha o algoritmo: (1) FIFO (2) LRU ou (3) LFU.")
+    while True:
+        choice = input("> ").strip()
+        match choice:
+            case "1":
+                return FIFOCache()
+            case "2":
+                return LRUCache()
+            case "3":
+                return LFUCache()
+            case _:
+                print("Opção inválida. Digite 1, 2 ou 3.")
 
 def main():
     print("===== Leitor de Textos - Projeto RA2 =====")
@@ -36,7 +40,7 @@ def main():
                 print(content[:500] + "...\n")
                 print("--------------------------\n")
                 # mostra métricas atuais
-                print(f"Requests: {cache.stats.requests} | Hits: {cache.stats.hits} | Misses: {cache.stats.misses} | Último tempo: {cache.stats.last_time:.4f}s\n")
+                print(f"Requests: {cache.stats.requests} | Hits: {cache.stats.hits} | Misses: {cache.stats.misses} | Tempo da última requisição: {cache.stats.last_time:.4f}s | Tempo total de requisições: {cache.stats.total_time:.4f}s\n")
             else:
                 print("Número inválido.")
         except ValueError:

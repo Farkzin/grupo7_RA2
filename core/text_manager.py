@@ -12,8 +12,4 @@ class TextManager:
         with open(path, "r", encoding="utf-8") as f:
             content = f.read()
 
-        # simular atraso: 0.01s por 1000 chars (ajuste se necessário)
-        simulated_delay = len(content) / 1000 * 0.01
-        time.sleep(simulated_delay)
-
         return content
