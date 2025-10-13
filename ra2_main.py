@@ -1,18 +1,26 @@
 from core.text_manager import TextManager
+from algorithms.lru_cache import LRUCache
+from algorithms.fifo_cache import FIFOCache
+from algorithms.lfu_cache import LFUCache
 from simulation.simulator import CacheSimulator
 
-import sys, os
-sys.path.append(os.path.abspath(os.path.dirname(__file__)))
+def choose_cache():
+    print("Escolha algoritmo de cache: (1) LRU (2) FIFO (3) LFU. Enter para LRU")
+    choice = input("> ").strip()
+    if choice == "2":
+        return FIFOCache()
+    elif choice == "3":
+        return LFUCache()
+    else:
+        return LRUCache()
 
 def main():
     print("===== Leitor de Textos - Projeto RA2 =====")
-    print("Digite o número do texto (1 a 100):")
-    print("0 - Sair | -1 - Modo Simulação\n")
+    cache = choose_cache()
 
     while True:
         try:
-            text_id = int(input("> "))
-
+            text_id = int(input("Digite o número do texto (1 a 100), 0 sair, -1 simulação: "))
             if text_id == 0:
                 print("Encerrando o programa...")
                 break
@@ -20,17 +28,19 @@ def main():
                 print("Entrando no modo simulação...\n")
                 sim = CacheSimulator()
                 sim.run_all()
-                print("\nSimulação concluída! Retornando ao menu principal...\n")
                 continue
             elif 1 <= text_id <= 100:
-                text = TextManager.load_text(text_id)
+                content = cache.get_text(text_id)
+                # Mostra apenas parte do texto
                 print(f"\n--- Texto {text_id} ---\n")
-                print(text[:500] + "...\n")
+                print(content[:500] + "...\n")
                 print("--------------------------\n")
+                # mostra métricas atuais
+                print(f"Requests: {cache.stats.requests} | Hits: {cache.stats.hits} | Misses: {cache.stats.misses} | Último tempo: {cache.stats.last_time:.4f}s\n")
             else:
-                print("Número inválido. Digite entre 1 e 100, ou 0/-1.")
+                print("Número inválido.")
         except ValueError:
             print("Entrada inválida. Digite um número inteiro.")
-
+            
 if __name__ == "__main__":
     main()
