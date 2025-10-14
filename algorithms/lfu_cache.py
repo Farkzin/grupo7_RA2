@@ -23,10 +23,4 @@ class LFUCache(CacheBase):
 
         # Insere o novo item
         self.storage[text_id] = content
-        self.freq[text_id] = self.freq.get(text_id, 0) + 1
-
-
-        # Insere o novo item
-        self.storage[text_id] = content
         self.freq[text_id] = 1
-    

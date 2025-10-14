@@ -1,6 +1,7 @@
 import random, csv, os, time
 import numpy as np
 import matplotlib.pyplot as plt
+import time
 
 from algorithms.fifo_cache import FIFOCache
 from algorithms.lru_cache import LRUCache
@@ -31,10 +32,8 @@ class CacheSimulator:
         elif mode == "ponderado":
             if random.random() < 0.43:
                 return random.randint(30, 40)
-            else:
-                # distribuir uniformemente exceto intervalo preferido
-                r = random.randint(1, 100)
-                return r
+            r = random.randint(1, 89)          # exclui 30–40 do restante
+            return r if r < 30 else r + 11
         else:
             raise ValueError("Modo desconhecido")
 
@@ -68,24 +67,69 @@ class CacheSimulator:
         return results
 
     def aggregate_and_plot(self):
-        # Exemplo rápido: calcular hit rate médio por algoritmo e modo
-        import glob, pandas as pd
-        all_files = glob.glob(os.path.join(OUTPUT_DIR, "*.csv"))
-        df = pd.concat([pd.read_csv(f) for f in all_files], ignore_index=True)
-        summary = df.groupby(["algo", "mode", "user"]).agg({
-            "hits": "max",
-            "misses": "max",
-            "last_time": "mean"
-        }).reset_index()
-        # hit rate
-        summary["hit_rate"] = summary["hits"] / (summary["hits"] + summary["misses"])
-        # plot hit rate por algoritmo (média entre users e modos)
-        plot = summary.groupby("algo")["hit_rate"].mean().sort_values()
-        ax = plot.plot(kind="bar", title="Hit rate médio por algoritmo")
-        fig = ax.get_figure()
-        fig.tight_layout()
-        fig.savefig(os.path.join(OUTPUT_DIR, "hit_rate_mean_by_algo.png"))
-        print("Gráfico salvo em", os.path.join(OUTPUT_DIR, "hit_rate_mean_by_algo.png"))
+        import os, glob
+        import pandas as pd
+        import matplotlib.pyplot as plt
+
+        files = glob.glob(os.path.join(OUTPUT_DIR, "*.csv"))
+        if not files:
+            print("Sem CSVs."); return
+
+        df = pd.concat([pd.read_csv(f) for f in files], ignore_index=True)
+        df = df.sort_values(["algo", "mode", "user", "req_id"])
+
+        # garantir colunas
+        if "hit" not in df.columns:
+            df["hits"] = pd.to_numeric(df.get("hits", 0), errors="coerce").fillna(0).astype(int)
+            df["hit"] = (df.groupby(["algo","mode","user"])["hits"]
+                        .diff().fillna(df["hits"]).clip(0,1).astype(int))
+        if "latency_ms" not in df.columns:
+            df["latency_ms"] = pd.to_numeric(df.get("last_time", 0), errors="coerce") * 1000
+        df["latency_ms"] = pd.to_numeric(df["latency_ms"], errors="coerce")
+        df = df.dropna(subset=["latency_ms"])
+        if df.empty:
+            print("Sem dados válidos."); return
+
+        # 1) Latência média por algoritmo
+        m1 = df.groupby("algo")["latency_ms"].mean().sort_values()
+        ax = m1.plot(kind="bar", title="Latência média por algoritmo")
+        ax.set_ylabel("ms"); fig = ax.get_figure(); fig.tight_layout()
+        fig.savefig(os.path.join(OUTPUT_DIR, "latency_mean_by_algo.png")); plt.close(fig)
+
+        # 2) Latência média por algoritmo e tipo (hit/miss)
+        m2 = (df.groupby(["algo","hit"])["latency_ms"].mean()
+                .unstack("hit").rename(columns={0:"miss",1:"hit"}).fillna(0))
+        ax = m2.plot(kind="bar", title="Latência média por algoritmo e tipo")
+        ax.set_ylabel("ms"); fig = ax.get_figure(); fig.tight_layout()
+        fig.savefig(os.path.join(OUTPUT_DIR, "latency_mean_by_algo_hit.png")); plt.close(fig)
+
+        # 3) Hit rate (%) por algoritmo
+        hr_algo = df.groupby("algo")["hit"].mean().mul(100).sort_values()
+        ax = hr_algo.plot(kind="bar", title="Hit rate (%) por algoritmo")
+        ax.set_ylabel("%"); fig = ax.get_figure(); fig.tight_layout()
+        fig.savefig(os.path.join(OUTPUT_DIR, "hit_rate_by_algo.png")); plt.close(fig)
+
+        # 4) Hit rate (%) por algoritmo e modo
+        hr_am = (df.groupby(["algo","mode"])["hit"].mean().mul(100)
+                .unstack("mode").fillna(0))
+        ax = hr_am.plot(kind="bar", title="Hit rate (%) por algoritmo e modo")
+        ax.set_ylabel("%"); fig = ax.get_figure(); fig.tight_layout()
+        fig.savefig(os.path.join(OUTPUT_DIR, "hit_rate_by_algo_mode.png")); plt.close(fig)
+
+        # 5) Latência p95 por algoritmo (ms)
+        p95 = df.groupby("algo")["latency_ms"].quantile(0.95).sort_values()
+        ax = p95.plot(kind="bar", title="Latência p95 por algoritmo")
+        ax.set_ylabel("ms"); fig = ax.get_figure(); fig.tight_layout()
+        fig.savefig(os.path.join(OUTPUT_DIR, "latency_p95_by_algo.png")); plt.close(fig)
+
+        # 6) Top 20 textos por taxa de miss (%)
+        miss_rate = (1 - df.groupby("text_id")["hit"].mean()).mul(100)
+        top_miss = miss_rate.sort_values(ascending=False).head(20)
+        ax = top_miss.plot(kind="bar", title="Top 20 textos por taxa de miss")
+        ax.set_ylabel("%"); fig = ax.get_figure(); fig.tight_layout()
+        fig.savefig(os.path.join(OUTPUT_DIR, "top20_miss_texts.png")); plt.close(fig)
+
+        print("Gráficos salvos em", OUTPUT_DIR)
 
     def run_all(self):
         for algo_name, algo_class in ALGO_CLASSES.items():
