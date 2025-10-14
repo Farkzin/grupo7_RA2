@@ -1,5 +1,5 @@
-# mru_cache.py
-# Implementação do algoritmo de substituição de cache MRU (Most Recently Used)
+ï»¿# mru_cache.py
+# ImplementaÃ§Ã£o do algoritmo de substituiÃ§Ã£o de cache MRU (Most Recently Used)
 
 
 from algorithms.cache_base import CacheBase
@@ -9,13 +9,15 @@ class MRUCache(CacheBase):
 
     def __init__(self):
         super().__init__()
-        self.order = []  # mantém a ordem de uso (mais recente no fim)
+        self.order = []  # mantÃ©m a ordem de uso (mais recente no fim)
 
     def _on_hit(self, text_id: int) -> None:
+             
         """
-        Quando um item é acessado (hit), ele se torna o mais recentemente usado.
+        Quando um item ï¿½ acessado (hit), ele se torna o mais recentemente usado.
         Portanto, movemos o ID dele para o final da lista.
         """
+        
         if text_id in self.order:
             self.order.remove(text_id)
             self.order.append(text_id)
@@ -23,16 +25,16 @@ class MRUCache(CacheBase):
     def _insert(self, text_id: int, content: str) -> None:
         """
         Insere novo item no cache.
-        Se estiver cheio, remove o MAIS recentemente usado (último da lista).
+        Se estiver cheio, remove o MAIS recentemente usado (Ãºltimo da lista).
         """
         if text_id in self.order:
             self.order.remove(text_id)
 
         # Se o cache estiver cheio, remove o item mais recentemente usado
         if len(self.storage) >= self.capacity:
-            mru_id = self.order.pop(-1)  # remove o último (mais recente)
+            mru_id = self.order.pop(-1)  # remove o Ãºltimo (mais recente)
             self.storage.pop(mru_id, None)
 
-        # Adiciona o novo item no final (agora é o mais recente)
+        # Adiciona o novo item no final (agora Ã© o mais recente)
         self.storage[text_id] = content
         self.order.append(text_id)
