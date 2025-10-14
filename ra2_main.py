@@ -1,11 +1,15 @@
+# ra2_main_mru.py
+# Versão do programa principal incluindo o novo algoritmo MRU
+
 from core.text_manager import TextManager
 from algorithms.lru_cache import LRUCache
 from algorithms.fifo_cache import FIFOCache
 from algorithms.lfu_cache import LFUCache
+from algorithms.mru_cache import MRUCache
 from simulation.simulator import CacheSimulator
 
 def choose_cache():
-    print("Escolha o algoritmo: (1) FIFO (2) LRU ou (3) LFU.")
+    print("Escolha o algoritmo: (1) FIFO (2) LRU (3) LFU (4) MRU.")
     while True:
         choice = input("> ").strip()
         match choice:
@@ -15,8 +19,10 @@ def choose_cache():
                 return LRUCache()
             case "3":
                 return LFUCache()
+            case "4":
+                return MRUCache()
             case _:
-                print("Opção inválida. Digite 1, 2 ou 3.")
+                print("Opção inválida. Digite 1, 2, 3 ou 4.")
 
 def main():
     print("===== Leitor de Textos - Projeto RA2 =====")
@@ -35,16 +41,14 @@ def main():
                 continue
             elif 1 <= text_id <= 100:
                 content = cache.get_text(text_id)
-                # Mostra apenas parte do texto
                 print(f"\n--- Texto {text_id} ---\n")
                 print(content[:500] + "...\n")
                 print("--------------------------\n")
-                # mostra métricas atuais
-                print(f"Requests: {cache.stats.requests} | Hits: {cache.stats.hits} | Misses: {cache.stats.misses} | Tempo da última requisição: {cache.stats.last_time:.4f}s | Tempo total de requisições: {cache.stats.total_time:.4f}s\n")
+                print(f"Requests: {cache.stats.requests} | Hits: {cache.stats.hits} | Misses: {cache.stats.misses} | Tempo da última requisição: {cache.stats.last_time:.4f}s | Tempo total: {cache.stats.total_time:.4f}s\n")
             else:
                 print("Número inválido.")
         except ValueError:
             print("Entrada inválida. Digite um número inteiro.")
-            
+
 if __name__ == "__main__":
     main()

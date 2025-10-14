@@ -6,14 +6,17 @@ import time
 from algorithms.fifo_cache import FIFOCache
 from algorithms.lru_cache import LRUCache
 from algorithms.lfu_cache import LFUCache
+from algorithms.mru_cache import MRUCache   # ✅ NOVO: import do MRU
 
 OUTPUT_DIR = "simulation_results"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
+# ✅ Adicionamos o MRU aqui
 ALGO_CLASSES = {
     "FIFO": FIFOCache,
     "LRU": LRUCache,
-    "LFU": LFUCache
+    "LFU": LFUCache,
+    "MRU": MRUCache
 }
 
 MODES = ["aleatorio", "poisson", "ponderado"]
@@ -45,7 +48,6 @@ class CacheSimulator:
             start = time.perf_counter()
             _ = cache.get_text(tid)
             duration = cache.stats.last_time  # CacheBase já mede e guarda last_time
-            # coletar snapshot dos counters para esta requisicao
             results.append({
                 "algo": algo_name,
                 "user": user_id,
@@ -57,7 +59,7 @@ class CacheSimulator:
                 "misses": cache.stats.misses,
                 "last_time": duration
             })
-        # salvar CSV por usuário
+        # salva CSV
         fname = os.path.join(OUTPUT_DIR, f"{algo_name}_{mode}_user{user_id}.csv")
         keys = results[0].keys()
         with open(fname, "w", newline="", encoding="utf-8") as f:
@@ -139,6 +141,7 @@ class CacheSimulator:
                     self.run_user(algo_name, algo_class, mode, user)
         print("Todas as simulações concluídas. Agregando resultados...")
         self.aggregate_and_plot()
+
 
 if __name__ == "__main__":
     sim = CacheSimulator()

@@ -95,3 +95,24 @@ Nao usa bibliotecas externas.
 - Cada vez que um texto é acessado, ele é movido para o final da lista de uso.
 - Quando o cache enche, o texto menos usado recentemente e removido.
 - Os textos sao lidos da pasta texts/ com nome text<ID>.txt.
+
+---
+
+# Algoritmo de Cache MRU (Most Recently Used)
+
+## Descrição
+O algoritmo MRU (Most Recently Used)** é o oposto do **LRU (Least Recently Used).  
+Enquanto o LRU remove o item **menos recentemente usado**, o MRU remove o **mais recentemente usado** quando o cache está cheio.
+
+Este comportamento pode ser útil em situações onde os itens recentemente acessados têm menor chance de serem reutilizados em breve.
+
+---
+
+## Funcionamento
+1. Hit: quando um item é acessado, ele é movido para o fim da lista, marcando-o como o mais recentemente usado.  
+2. Miss:
+   - Se o cache não estiver cheio, apenas insere o item no fim.
+   - Se o cache estiver cheio, remove o item mais recentemente usado (último da lista).
+3. O novo item é sempre adicionado como o mais recente.
+
+
